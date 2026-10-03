@@ -11,7 +11,7 @@ public class User
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
 
-    enum Role { Client, Owner, Admin };
+    public string Role { get; set; } = "User";
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
