@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.19">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TasteMap.Application\TasteMap.Application.csproj" />
     <ProjectReference Include="..\TasteMap.Infrastructure\TasteMap.Infrastructure.csproj" />
     <ProjectReference Include="..\TasteMap.Domain\TasteMap.Domain.csproj" />
   </ItemGroup>
