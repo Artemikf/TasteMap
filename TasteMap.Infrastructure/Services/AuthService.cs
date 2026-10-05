@@ -11,7 +11,7 @@ using TasteMap.Application.Interfaces;
 using TasteMap.Domain.Entities;
 using TasteMap.Infrastructure.Data;
 
-namespace TasteMap.Application.Services;
+namespace TasteMap.Infrastructure.Services;
 
 public class AuthService : IAuthService
 {

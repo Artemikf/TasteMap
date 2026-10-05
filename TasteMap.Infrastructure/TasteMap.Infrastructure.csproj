@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TasteMap.Domain\TasteMap.Domain.csproj" />
+    <ProjectReference Include="..\TasteMap.Application\TasteMap.Application.csproj" />
   </ItemGroup>
 
 </Project>

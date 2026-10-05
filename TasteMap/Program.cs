@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using TasteMap.Application.Interfaces;
-using TasteMap.Application.Services;
 using TasteMap.Infrastructure.Data;
+using TasteMap.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +19,7 @@ builder.Services.AddSwaggerGen();
 
 // Регистрация наших сервисов
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Настройка JWT Аутентификации
 var jwtSettings = builder.Configuration.GetSection("Jwt");

@@ -18,7 +18,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\TasteMap.Domain\TasteMap.Domain.csproj" />
 		<!-- Ссылка на слой инфраструктуры, чтобы Application видел AppDbContext -->
-		<ProjectReference Include="..\TasteMap.Infrastructure\TasteMap.Infrastructure.csproj" />
+		<!--<ProjectReference Include="..\TasteMap.Infrastructure\TasteMap.Infrastructure.csproj" /> -->
 	</ItemGroup>
 
 </Project>
