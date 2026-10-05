@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using TasteMap.Application.Interfaces;
 using TasteMap.Infrastructure.Data;
 using TasteMap.Infrastructure.Services;
+using TasteMap.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. ВСЕ РЕГИСТРАЦИИ СЕРВИСОВ ДОЛЖНЫ БЫТЬ ЗДЕСЬ (ДО BUILD) ---
+// --- 1. ВСЕ РЕГИСТРАЦИИ СЕРВИСОВ 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -17,7 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Регистрация наших сервисов
+// Регистрация  сервисов
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 

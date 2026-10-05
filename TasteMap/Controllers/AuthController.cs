@@ -42,4 +42,18 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string email, [FromQuery] string code)
+    {
+        try
+        {
+            var result = await _authService.VerifyEmailAsync(email, code);
+            return Ok(new { message = "Email успешно подтвержден!" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }   

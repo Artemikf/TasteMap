@@ -13,6 +13,9 @@ public class User
 
     public string Role { get; set; } = "User";
     public string? RefreshToken { get; set; }
+    public string? VerificationCode { get; set; }
+    public bool IsEmailVerified { get; set; } = false;
+
     public DateTime? RefreshTokenExpiryTime { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

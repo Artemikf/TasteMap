@@ -1,34 +1,37 @@
-﻿using BCrypt.Net;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using TasteMap.Application.DTOs;
 using TasteMap.Application.Interfaces;
 using TasteMap.Domain.Entities;
 using TasteMap.Infrastructure.Data;
 
-namespace TasteMap.Infrastructure.Services;
+namespace TasteMap.Application.Services;
 
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService; // Добавили сервис почты
 
-    public AuthService(AppDbContext context, IConfiguration configuration)
+    public AuthService(AppDbContext context, IConfiguration configuration, IEmailService emailService)
     {
         _context = context;
         _configuration = configuration;
+        _emailService = emailService;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(UserRegisterDto dto)
     {
-        // Проверяем, не занят ли email
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             throw new Exception("Пользователь с таким Email уже существует.");
+
+        // Генерируем 6-значный код
+        var verificationCode = new Random().Next(100000, 999999).ToString();
 
         var user = new User
         {
@@ -36,12 +39,22 @@ public class AuthService : IAuthService
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = dto.IsRestaurantOwner ? "RestaurantOwner" : "User"
+            Role = dto.IsRestaurantOwner ? "RestaurantOwner" : "User",
+            VerificationCode = verificationCode,
+            IsEmailVerified = false
         };
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
+        // Отправляем письмо с кодом
+        var emailMessage = $@"
+            <h2>Добро пожаловать в TasteMap!</h2>
+            <p>Ваш код подтверждения регистрации: <strong>{verificationCode}</strong></p>";
+
+        await _emailService.SendEmailAsync(user.Email, "Код подтверждения TasteMap", emailMessage);
+
+        // Возвращаем токен (фронтенд сможет пустить юзера на страницу ввода кода)
         var token = GenerateJwtToken(user);
 
         return new AuthResponseDto
@@ -51,6 +64,20 @@ public class AuthService : IAuthService
             Role = user.Role,
             FirstName = user.FirstName
         };
+    }
+
+    public async Task<bool> VerifyEmailAsync(string email, string code)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null) throw new Exception("Пользователь не найден.");
+        if (user.IsEmailVerified) throw new Exception("Почта уже подтверждена.");
+        if (user.VerificationCode != code) throw new Exception("Неверный код подтверждения.");
+
+        user.IsEmailVerified = true;
+        user.VerificationCode = null; // Очищаем код после использования
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<AuthResponseDto> LoginAsync(UserLoginDto dto)
