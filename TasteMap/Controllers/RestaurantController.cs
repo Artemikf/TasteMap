@@ -38,4 +38,23 @@ public class RestaurantController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    // Публичный доступ — просмотр всех ресторанов с возможностью фильтрации
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] string? city, [FromQuery] string? type, [FromQuery] bool? hasKidsZone)
+    {
+        var restaurants = await _restaurantService.GetAllAsync(city, type, hasKidsZone);
+        return Ok(restaurants);
+    }
+
+    // Публичный доступ — детальная страница одного ресторана
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var restaurant = await _restaurantService.GetByIdAsync(id);
+        if (restaurant == null)
+            return NotFound(new { message = "Ресторан не найден." });
+
+        return Ok(restaurant);
+    }
 }
