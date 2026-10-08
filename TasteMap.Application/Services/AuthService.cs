@@ -8,17 +8,16 @@ using Microsoft.IdentityModel.Tokens;
 using TasteMap.Application.DTOs;
 using TasteMap.Application.Interfaces;
 using TasteMap.Domain.Entities;
-using TasteMap.Infrastructure.Data;
 
 namespace TasteMap.Application.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly AppDbContext _context;
+    private readonly IAppDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService; // Добавили сервис почты
 
-    public AuthService(AppDbContext context, IConfiguration configuration, IEmailService emailService)
+    public AuthService(IAppDbContext context, IConfiguration configuration, IEmailService emailService)
     {
         _context = context;
         _configuration = configuration;
@@ -52,9 +51,17 @@ public class AuthService : IAuthService
             <h2>Добро пожаловать в TasteMap!</h2>
             <p>Ваш код подтверждения регистрации: <strong>{verificationCode}</strong></p>";
 
-        await _emailService.SendEmailAsync(user.Email, "Код подтверждения TasteMap", emailMessage);
+        try
+        {
+            await _emailService.SendEmailAsync(user.Email, "Код подтверждения TasteMap", emailMessage);
+        }
+        catch (Exception)
+        {
+            // Для локальной разработки: если почта заблокирована, просто выводим код в консоль
+            Console.WriteLine($"\n[DEV MODE] Письмо не отправлено. Код для {user.Email}: {verificationCode}\n");
+        }
 
-        // Возвращаем токен (фронтенд сможет пустить юзера на страницу ввода кода)
+        // Возвращаем токен (теперь код дойдет до сюда даже при ошибке SMTP!)
         var token = GenerateJwtToken(user);
 
         return new AuthResponseDto

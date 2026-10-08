@@ -1,0 +1,41 @@
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TasteMap.Application.DTOs.Restaurants;
+using TasteMap.Application.Interfaces;
+
+namespace TasteMap.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class RestaurantController : ControllerBase
+{
+    private readonly IRestaurantService _restaurantService;
+
+    public RestaurantController(IRestaurantService restaurantService)
+    {
+        _restaurantService = restaurantService;
+    }
+
+    [Authorize(Roles = "RestaurantOwner")]
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantDto dto)
+    {
+        try
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out int ownerId))
+            {
+                return Unauthorized(new { message = "Не удалось определить пользователя." });
+            }
+
+            var restaurantId = await _restaurantService.CreateRestaurantAsync(ownerId, dto);
+
+            return Ok(new { message = "Ресторан успешно добавлен!", restaurantId = restaurantId });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+}
