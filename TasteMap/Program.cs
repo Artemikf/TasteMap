@@ -19,9 +19,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Связываем интерфейс IAppDbContext с реальным классом AppDbContext
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 
 // Настройка Swagger с поддержкой JWT
 builder.Services.AddSwaggerGen(c =>
