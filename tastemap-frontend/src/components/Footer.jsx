@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Facebook } from 'lucide-react';
+import { Globe, Share2 } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -42,8 +42,8 @@ export default function Footer() {
 
             <div className="max-w-7xl mx-auto px-4 border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
                 <div className="flex gap-4 mb-4 md:mb-0">
-                    <Instagram className="w-5 h-5 cursor-pointer hover:text-white" />
-                    <Facebook className="w-5 h-5 cursor-pointer hover:text-white" />
+                    <Globe className="w-5 h-5 cursor-pointer hover:text-white" />
+                    <Share2 className="w-5 h-5 cursor-pointer hover:text-white" />
                 </div>
                 <div>
                     Авторські права © 2026 Tastemap.com . Усі права захищено.
