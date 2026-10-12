@@ -130,6 +130,10 @@ namespace TasteMap.Infrastructure.Migrations
                     b.Property<bool>("HasWifi")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsPetFriendly")
                         .HasColumnType("boolean");
 

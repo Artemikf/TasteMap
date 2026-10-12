@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import RegisterPartnerPage from './pages/RegisterPartnerPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import ProfilePage from './pages/ProfilePage';
+import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
                         <Route path="/register-partner" element={<RegisterPartnerPage />} />
                         <Route path="/verify-email" element={<VerifyEmailPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/dashboard" element={<OwnerDashboardPage />} />
                         <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                 </main>

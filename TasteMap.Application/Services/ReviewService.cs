@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TasteMap.Application.DTOs.Restaurants;
 using TasteMap.Application.DTOs.Reviews;
 using TasteMap.Application.Interfaces;
 using TasteMap.Domain.Entities;

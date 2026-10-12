@@ -1,18 +1,37 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/axios';
 
 export default function RegisterPage() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Если пользователь уже вошел в аккаунт, отправляем его в профиль или панель управления
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/dashboard');
+        }
+    }, [navigate]);
+
+    const initialIsOwner = location.state?.isOwner || false;
+
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         password: '',
         confirmPassword: '',
-        isRestaurantOwner: false
+        isRestaurantOwner: initialIsOwner
     });
+
     const [error, setError] = useState('');
-    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.state?.isOwner) {
+            setFormData(prev => ({ ...prev, isRestaurantOwner: true }));
+        }
+    }, [location.state]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -40,7 +59,6 @@ export default function RegisterPage() {
                 isRestaurantOwner: formData.isRestaurantOwner
             });
 
-            // Сохраняем email для подстановки на странице ввода кода
             localStorage.setItem('unverified_email', formData.email);
             alert('Реєстрація успішна! Перевірте пошту для підтвердження.');
             navigate('/verify-email');

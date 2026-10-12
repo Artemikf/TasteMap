@@ -11,6 +11,9 @@ public class RestaurantDto
     public int TotalTables { get; set; }
     public int MaxGuestsCapacity { get; set; }
 
+    //  ImageUrl:
+    public string ImageUrl { get; set; } = string.Empty;
+
     // Удобства
     public bool HasKidsZone { get; set; }
     public bool IsPetFriendly { get; set; }

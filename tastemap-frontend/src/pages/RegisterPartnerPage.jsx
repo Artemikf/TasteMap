@@ -5,8 +5,14 @@ export default function RegisterPartnerPage() {
     const navigate = useNavigate();
 
     const handleStartRegistration = () => {
-        // Переходим на регистрацию с заранее выбранным типом "Владелец заведения"
-        navigate('/register');
+        const token = localStorage.getItem('token');
+        if (token) {
+            // Если пользователь уже авторизован, отправляем в панель управления
+            navigate('/dashboard');
+        } else {
+            // Если не авторизован — на регистрацию с выставленной галочкой
+            navigate('/register', { state: { isOwner: true } });
+        }
     };
 
     return (

@@ -24,6 +24,7 @@ public class RestaurantService : IRestaurantService
             Address = dto.Address,
             City = dto.City,
             RestaurantType = dto.RestaurantType,
+            //ImageUrl = dto.ImageUrl, // <-- Не забудь добавить сохранение фото!
             TotalTables = dto.TotalTables,
             MaxGuestsCapacity = dto.MaxGuestsCapacity,
             HasKidsZone = dto.HasKidsZone,
@@ -43,15 +44,27 @@ public class RestaurantService : IRestaurantService
     {
         var query = _context.Restaurants.Include(r => r.Owner).AsQueryable();
 
-        // Фильтрация
-        if (!string.IsNullOrWhiteSpace(city))
-            query = query.Where(r => r.City.ToLower() == city.ToLower());
+        // 1. Фильтр по городу
+        if (!string.IsNullOrWhiteSpace(city) && !city.Equals("все", StringComparison.OrdinalIgnoreCase) && !city.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(r => r.City.ToLower().Contains(city.Trim().ToLower()));
+        }
 
-        if (!string.IsNullOrWhiteSpace(type))
-            query = query.Where(r => r.RestaurantType.ToLower() == type.ToLower());
+        // 2. Фильтр по типу кухни (гибкий поиск через Contains вместо strict ==)
+        if (!string.IsNullOrWhiteSpace(type)
+            && !type.Equals("все", StringComparison.OrdinalIgnoreCase)
+            && !type.Equals("всі", StringComparison.OrdinalIgnoreCase)
+            && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            var cleanType = type.Trim().ToLower();
+            query = query.Where(r => r.RestaurantType.ToLower().Contains(cleanType));
+        }
 
+        // 3. Фильтр по детской зоне
         if (hasKidsZone.HasValue && hasKidsZone.Value)
+        {
             query = query.Where(r => r.HasKidsZone);
+        }
 
         return await query.Select(r => new RestaurantDto
         {
@@ -61,6 +74,7 @@ public class RestaurantService : IRestaurantService
             Address = r.Address,
             City = r.City,
             RestaurantType = r.RestaurantType,
+            ImageUrl = r.ImageUrl, // <-- Привязываем фото к выгрузке
             TotalTables = r.TotalTables,
             MaxGuestsCapacity = r.MaxGuestsCapacity,
             HasKidsZone = r.HasKidsZone,
@@ -68,7 +82,7 @@ public class RestaurantService : IRestaurantService
             HasWifi = r.HasWifi,
             HasParking = r.HasParking,
             HasSummerTerrace = r.HasSummerTerrace,
-            OwnerName = $"{r.Owner.FirstName} {r.Owner.LastName}"
+            OwnerName = r.Owner != null ? $"{r.Owner.FirstName} {r.Owner.LastName}" : string.Empty
         }).ToListAsync();
     }
 
@@ -88,6 +102,7 @@ public class RestaurantService : IRestaurantService
             Address = r.Address,
             City = r.City,
             RestaurantType = r.RestaurantType,
+            ImageUrl = r.ImageUrl,
             TotalTables = r.TotalTables,
             MaxGuestsCapacity = r.MaxGuestsCapacity,
             HasKidsZone = r.HasKidsZone,
@@ -95,7 +110,33 @@ public class RestaurantService : IRestaurantService
             HasWifi = r.HasWifi,
             HasParking = r.HasParking,
             HasSummerTerrace = r.HasSummerTerrace,
-            OwnerName = $"{r.Owner.FirstName} {r.Owner.LastName}"
+            OwnerName = r.Owner != null ? $"{r.Owner.FirstName} {r.Owner.LastName}" : string.Empty
+        };
+    }
+
+    public async Task<RestaurantDto?> GetByOwnerIdAsync(int ownerId)
+    {
+        var restaurant = await _context.Restaurants
+            .FirstOrDefaultAsync(r => r.OwnerId == ownerId);
+
+        if (restaurant == null) return null;
+
+        return new RestaurantDto
+        {
+            Id = restaurant.Id,
+            Name = restaurant.Name,
+            Description = restaurant.Description,
+            Address = restaurant.Address,
+            City = restaurant.City,
+            RestaurantType = restaurant.RestaurantType,
+            ImageUrl = restaurant.ImageUrl,
+            TotalTables = restaurant.TotalTables,
+            MaxGuestsCapacity = restaurant.MaxGuestsCapacity,
+            HasKidsZone = restaurant.HasKidsZone,
+            IsPetFriendly = restaurant.IsPetFriendly,
+            HasWifi = restaurant.HasWifi,
+            HasParking = restaurant.HasParking,
+            HasSummerTerrace = restaurant.HasSummerTerrace
         };
     }
 }

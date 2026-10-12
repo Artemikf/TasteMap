@@ -57,4 +57,31 @@ public class RestaurantController : ControllerBase
 
         return Ok(restaurant);
     }
+
+    [Authorize(Roles = "RestaurantOwner")]
+    [HttpGet("my-restaurant")]
+    public async Task<IActionResult> GetMyRestaurant()
+    {
+        try
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out int ownerId))
+            {
+                return Unauthorized(new { message = "Не вдалося визначити користувача." });
+            }
+
+            var restaurant = await _restaurantService.GetByOwnerIdAsync(ownerId);
+            if (restaurant == null)
+            {
+                // Возвращаем 200 OK со значением null (или 404), чтобы фронтенд сразу предлагал создать ресторан
+                return Ok(null);
+            }
+
+            return Ok(restaurant);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

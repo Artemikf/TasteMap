@@ -9,4 +9,5 @@ public interface IRestaurantService
     // new
     Task<IEnumerable<RestaurantDto>> GetAllAsync(string? city = null, string? type = null, bool? hasKidsZone = null);
     Task<RestaurantDto?> GetByIdAsync(int id);
+    Task<RestaurantDto?> GetByOwnerIdAsync(int ownerId);
 }
