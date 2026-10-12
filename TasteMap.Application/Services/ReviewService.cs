@@ -54,4 +54,23 @@ public class ReviewService : IReviewService
             })
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<ReviewDto>> GetUserReviewsAsync(int userId)
+    {
+        var reviews = await _context.Reviews
+            .Include(r => r.Restaurant)
+            .Where(r => r.UserId == userId)
+            .Select(r => new ReviewDto
+            {
+                Id = r.Id,
+                RestaurantId = r.RestaurantId,
+                RestaurantName = r.Restaurant.Name,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt
+            })
+            .ToListAsync();
+
+        return reviews;
+    }
 }

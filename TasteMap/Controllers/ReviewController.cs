@@ -39,4 +39,19 @@ public class ReviewController : ControllerBase
         var reviews = await _reviewService.GetRestaurantReviewsAsync(restaurantId);
         return Ok(reviews);
     }
+
+    [HttpGet("my-reviews")]
+    [Authorize]
+    public async Task<IActionResult> GetMyReviews()
+    {
+        // Получаем Id авторизованного пользователя из JWT токена
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized();
+        }
+
+        var reviews = await _reviewService.GetUserReviewsAsync(userId);
+        return Ok(reviews);
+    }
 }

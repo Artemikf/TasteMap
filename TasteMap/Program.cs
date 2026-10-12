@@ -11,20 +11,31 @@ using TasteMap.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. РЕГИСТРАЦИЯ СЕРВИСОВ ---
+// --- 1. РЕГИСТРАЦИЯ СЕРВИСОВ И CORS ---
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Связываем интерфейс IAppDbContext с реальным классом AppDbContext
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
 
 // Настройка Swagger с поддержкой JWT
 builder.Services.AddSwaggerGen(c =>
@@ -56,11 +67,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Регистрация бизнес-сервисов
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IRestaurantService, RestaurantService>();
-
 // Настройка JWT Аутентификации
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -89,21 +95,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// Настройка CORS для React
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-// --- 2. СБОРКА ПРИЛОЖЕНИЯ ---
+// --- 2. СБОРКА И MIDDLEWARE ---
 var app = builder.Build();
-
-// --- 3. MIDDLEWARE ---
 
 using (var scope = app.Services.CreateScope())
 {
@@ -117,11 +110,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Включаем CORS ДО авторизации (HTTPS-редирект отключен для локальной разработки)
+app.UseCors("AllowReactApp");
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 

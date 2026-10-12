@@ -6,7 +6,9 @@ import HomePage from './pages/HomePage';
 import RestaurantDetailPage from './pages/RestaurantDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import RegisterPartnerPage from './pages/RegisterPartnerPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import ProfilePage from './pages/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -20,7 +22,9 @@ export default function App() {
                         <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/register-partner" element={<RegisterPartnerPage />} />
                         <Route path="/verify-email" element={<VerifyEmailPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
                         <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                 </main>

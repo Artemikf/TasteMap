@@ -15,26 +15,32 @@ export default function LoginPage() {
         try {
             const response = await api.post('/Auth/login', { email, password });
 
-            // Сохраняем JWT токен в localStorage
             localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
 
-            alert('Вхід успішний!');
-            navigate('/');
+            const userData = response.data.user || {
+                firstName: email.split('@')[0],
+                email,
+            };
+            localStorage.setItem('user', JSON.stringify(userData));
+
+            navigate('/profile');
         } catch (err) {
-            setError(err.response?.data?.message || 'Помилка входу. Перевірте данные.');
+            setError(
+                err.response?.data?.message || 'Помилка входу. Перевірте дані.'
+            );
         }
     };
 
     return (
         <div className="max-w-6xl mx-auto my-12 px-4">
-            {/* Хлебные крошки */}
             <div className="text-xs text-gray-400 mb-6">
-                <Link to="/" className="hover:underline">Головна</Link> &gt; <span className="text-gray-600">Вхід</span>
+                <Link to="/" className="hover:underline">
+                    Головна
+                </Link>{' '}
+                &gt; <span className="text-gray-600">Вхід</span>
             </div>
 
             <div className="bg-gray-50 rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2 shadow-sm border border-gray-100">
-                {/* Левая часть: Изображение блюда */}
                 <div className="relative min-h-[350px] md:min-h-[500px]">
                     <img
                         src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80"
@@ -43,7 +49,6 @@ export default function LoginPage() {
                     />
                 </div>
 
-                {/* Правая часть: Форма входа */}
                 <div className="p-8 md:p-12 flex flex-col justify-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
                         Увійдіть або створіть акаунт
@@ -66,7 +71,7 @@ export default function LoginPage() {
                             <input
                                 type="email"
                                 required
-                                placeholder="Введіть свою електронну адресу"
+                                placeholder="Введіть свою електронную адресу"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white text-sm"
