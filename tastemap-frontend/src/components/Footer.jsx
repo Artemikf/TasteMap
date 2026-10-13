@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Share2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
     return (
@@ -8,49 +8,39 @@ export default function Footer() {
                 <div>
                     <h4 className="text-brand font-bold mb-4">Підтримка</h4>
                     <ul className="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" className="hover:text-white">Реєстрація</a></li>
-                        <li><a href="#" className="hover:text-white">Забули пароль?</a></li>
-                        <li><a href="#" className="hover:text-white">Зв'язатися з центром допомоги</a></li>
+                        <li><Link to="/register" className="hover:text-white transition">Реєстрація</Link></li>
+                        <li><Link to="/forgot-password" className="hover:text-white transition">Забули пароль?</Link></li>
+                        <li><Link to="/help" className="hover:text-white transition">Зв'язатися з центром допомоги</Link></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 className="text-brand font-bold mb-4">Правила та налаштування</h4>
                     <ul className="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" className="hover:text-white">Конфіденційність і файли cookie</a></li>
-                        <li><a href="#" className="hover:text-white">Правила та умови</a></li>
-                        <li><a href="#" className="hover:text-white">Розв'язання суперечок</a></li>
+                        <li><Link to="/privacy" className="hover:text-white transition">Конфіденційність і файли cookie</Link></li>
+                        <li><Link to="/terms" className="hover:text-white transition">Правила та умови</Link></li>
+                        <li><Link to="/help" className="hover:text-white transition">Розв'язання суперечок</Link></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 className="text-brand font-bold mb-4">Партнерам</h4>
                     <ul className="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" className="hover:text-white">Допомога партнерам</a></li>
-                        <li><a href="#" className="hover:text-white">Зареєструвати свій заклад</a></li>
+                        <li><Link to="/partner-help" className="hover:text-white transition">Допомога партнерам</Link></li>
+                        <li><Link to="/register-partner" className="hover:text-white transition">Зареєструвати свій заклад</Link></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 className="text-brand font-bold mb-4">Загальна інформація</h4>
                     <ul className="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" className="hover:text-white">Про нас</a></li>
-                        <li><a href="#" className="hover:text-white">Як ми працюємо</a></li>
+                        <li><Link to="/about" className="hover:text-white transition">Про нас</Link></li>
+                        <li><Link to="/how-it-works" className="hover:text-white transition">Як ми працюємо</Link></li>
                     </ul>
                 </div>
             </div>
-
-            <div className="max-w-7xl mx-auto px-4 border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-                <div className="flex gap-4 mb-4 md:mb-0">
-                    <Globe className="w-5 h-5 cursor-pointer hover:text-white" />
-                    <Share2 className="w-5 h-5 cursor-pointer hover:text-white" />
-                </div>
-                <div>
-                    Авторські права © 2026 Tastemap.com . Усі права захищено.
-                </div>
-                <button className="border border-gray-700 px-3 py-1 rounded-full hover:border-gray-500 text-gray-400">
-                    UAN
-                </button>
+            <div className="max-w-7xl mx-auto px-4 border-t border-gray-800 pt-6 text-center text-xs text-gray-500">
+                &copy; {new Date().getFullYear()} TasteMap. Всі права захищено.
             </div>
         </footer>
     );

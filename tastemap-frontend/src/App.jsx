@@ -12,6 +12,13 @@ import ProfilePage from './pages/ProfilePage';
 import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import HelpCenterPage from './pages/HelpCenterPage';
+import AboutPage from './pages/AboutPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import PartnerHelpPage from './pages/PartnerHelpPage';
+
 export default function App() {
     return (
         <BrowserRouter>
@@ -28,6 +35,13 @@ export default function App() {
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/dashboard" element={<OwnerDashboardPage />} />
                         <Route path="*" element={<NotFoundPage />} />
+
+                        <Route path="/privacy" element={<PrivacyPage />} />
+                        <Route path="/terms" element={<TermsPage />} />
+                        <Route path="/help" element={<HelpCenterPage />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/how-it-works" element={<HowItWorksPage />} />
+                        <Route path="/partner-help" element={<PartnerHelpPage />} />
                     </Routes>
                 </main>
                 <Footer />
