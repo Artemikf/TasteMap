@@ -8,7 +8,7 @@ export default {
         extend: {
             colors: {
                 brand: {
-                    DEFAULT: '#FF5722', // Наш фирменный оранжевый
+                    DEFAULT: '#FF5722', //  фирменный оранжевый
                     hover: '#E64A19',
                 }
             }
