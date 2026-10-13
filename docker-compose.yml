@@ -1,16 +1,40 @@
 services:
-  postgres_db:
-    image: postgres:16-alpine # Используем легкую версию Postgres
-    container_name: tastemap_postgres
-    restart: always
+  # 1. База данных PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: tastemap-db
     environment:
+      POSTGRES_DB: tastemap_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: SuperSecretPassword123!
-      POSTGRES_DB: TasteMapDb
+      POSTGRES_PASSWORD: your_secure_password
     ports:
-      - "5432:5432" # Пробрасываем порт из контейнера наружу
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Чтобы данные не удалились при перезапуске контейнера
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Backend .NET API
+  backend:
+    build:
+      context: ./TasteMap
+      dockerfile: Dockerfile
+    container_name: tastemap-api
+    ports:
+      - "5068:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=tastemap_db;Username=postgres;Password=your_secure_password
+    depends_on:
+      - postgres
+
+  # 3. Frontend React + Nginx
+  frontend:
+    build:
+      context: ./tastemap-frontend
+      dockerfile: Dockerfile
+    container_name: tastemap-web
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
