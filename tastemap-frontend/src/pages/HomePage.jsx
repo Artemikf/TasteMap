@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Users, Calendar, Star, Heart } from 'lucide-react';
+import {
+    Search, MapPin, Users, Calendar, Star, Heart,
+    Dog, Sun, Baby, Wifi, ParkingCircle, X
+} from 'lucide-react';
 import api from '../api/axios';
 
 export default function HomePage() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCuisine, setSelectedCuisine] = useState('');
 
-    // Загружаем список ресторанов с нашего .NET API
+    // Основні фільтри
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCity, setSelectedCity] = useState('');
+    const [selectedCuisine, setSelectedCuisine] = useState('');
+    const [guests, setGuests] = useState('');
+    const [bookingDate, setBookingDate] = useState('');
+
+    // Фільтри зручностей (Boolean)
+    const [hasWifi, setHasWifi] = useState(false);
+    const [isPetFriendly, setIsPetFriendly] = useState(false);
+    const [hasKidsZone, setHasKidsZone] = useState(false);
+    const [hasParking, setHasParking] = useState(false);
+    const [hasSummerTerrace, setHasSummerTerrace] = useState(false);
+
     useEffect(() => {
         fetchRestaurants();
     }, []);
@@ -17,7 +31,7 @@ export default function HomePage() {
     const fetchRestaurants = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/Restaurant'); // GET /api/Restaurant
+            const response = await api.get('/Restaurant');
             setRestaurants(response.data);
         } catch (err) {
             console.error('Помилка завантаження ресторанів:', err);
@@ -26,84 +40,205 @@ export default function HomePage() {
         }
     };
 
-    // Фильтрация на клиенте
+    // Гнучка фільтрація на клієнті за всіма критеріями
     const filteredRestaurants = restaurants.filter(r => {
-        const matchesSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            r.city?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCuisine = selectedCuisine ? r.cuisineType === selectedCuisine : true;
-        return matchesSearch && matchesCuisine;
+        // Пошук за назвою або адресою
+        const matchesSearch = !searchTerm ||
+            r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            r.address?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Місто
+        const matchesCity = !selectedCity ||
+            r.city?.toLowerCase() === selectedCity.toLowerCase();
+
+        // Тип кухні
+        const type = r.restaurantType || r.cuisineType || '';
+        const matchesCuisine = !selectedCuisine ||
+            type.toLowerCase().includes(selectedCuisine.toLowerCase());
+
+        // Кількість гостей (макс. місткість закладу має бути більше або дорівнювати запиту)
+        const matchesGuests = !guests || (r.maxGuestsCapacity ? r.maxGuestsCapacity >= Number(guests) : true);
+
+        // Зручності (Boolean)
+        const matchesWifi = !hasWifi || r.hasWifi;
+        const matchesPet = !isPetFriendly || r.isPetFriendly;
+        const matchesKids = !hasKidsZone || r.hasKidsZone;
+        const matchesParking = !hasParking || r.hasParking;
+        const matchesTerrace = !hasSummerTerrace || r.hasSummerTerrace;
+
+        return matchesSearch && matchesCity && matchesCuisine && matchesGuests &&
+            matchesWifi && matchesPet && matchesKids && matchesParking && matchesTerrace;
     });
+
+    const resetAllFilters = () => {
+        setSearchTerm('');
+        setSelectedCity('');
+        setSelectedCuisine('');
+        setGuests('');
+        setBookingDate('');
+        setHasWifi(false);
+        setIsPetFriendly(false);
+        setHasKidsZone(false);
+        setHasParking(false);
+        setHasSummerTerrace(false);
+    };
+
+    const hasActiveFilters = searchTerm || selectedCity || selectedCuisine || guests || bookingDate ||
+        hasWifi || isPetFriendly || hasKidsZone || hasParking || hasSummerTerrace;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-16">
-            {/* Hero Section / Блок поиска */}
-            <div className="bg-gradient-to-r from-orange-500 to-brand text-white py-12 px-4 shadow-inner">
-                <div className="max-w-6xl mx-auto text-center">
-                    <h1 className="text-3xl md:text-5xl font-extrabold mb-4 text-white">
-                        Знайдіть і забронюйте найкращий столик
+            {/* Головний банер (Hero Section) */}
+            <div className="relative overflow-hidden mb-8 min-h-[480px] flex items-center justify-center text-center shadow-lg">
+                {/* 1. Фонове фото закладу */}
+                <img
+                    src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80"
+                    alt="TasteMap Restaurant Background"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+
+                {/* 2. Шар затемнення (Overlay) */}
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+
+                {/* 3. Контент банера та розширена панель пошуку */}
+                <div className="relative z-10 max-w-5xl mx-auto px-4 py-10 text-white w-full">
+                    <h1 className="text-3xl md:text-5xl font-extrabold mb-3 leading-tight">
+                        Знайдіть і забронюйте свій <span className="text-brand">ІДЕАЛЬНИЙ</span> столик
                     </h1>
-                    <p className="text-orange-100 mb-8 text-sm md:text-base">
-                        Відкривайте для себе популярні ресторани, кафе та бари у вашому місті
+                    <p className="text-xs md:text-sm text-gray-200 mb-8 max-w-xl mx-auto">
+                        Обирайте за датою, кількістю гостей, зручностями та типом кухні
                     </p>
 
-                    {/* Панель поиска */}
-                    <div className="bg-white p-3 rounded-2xl shadow-xl max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 text-gray-800">
-                        <div className="flex items-center gap-2 px-3 py-2 border-r md:border-r border-gray-200">
-                            <MapPin className="w-5 h-5 text-brand shrink-0" />
-                            <input
-                                type="text"
-                                placeholder="Місто або ресторан..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-transparent outline-none text-sm placeholder-gray-400"
-                            />
+                    {/* Мульти-панель фільтрів у банері */}
+                    <div className="bg-white/95 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-white/20 text-gray-800 text-left">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                            {/* 1. Назва / адреса */}
+                            <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-brand">
+                                <Search className="w-4 h-4 text-gray-400 shrink-0" />
+                                <input
+                                    type="text"
+                                    placeholder="Назва або адреса..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-xs text-gray-800 placeholder-gray-400"
+                                />
+                            </div>
+
+                            {/* 2. Місто */}
+                            <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-brand">
+                                <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                                <select
+                                    value={selectedCity}
+                                    onChange={(e) => setSelectedCity(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-xs text-gray-800 cursor-pointer"
+                                >
+                                    <option value="">Усі міста</option>
+                                    <option value="Київ">Київ</option>
+                                    <option value="Львів">Львів</option>
+                                    <option value="Одеса">Одеса</option>
+                                    <option value="Дніпро">Дніпро</option>
+                                    <option value="Харків">Харків</option>
+                                </select>
+                            </div>
+
+                            {/* 3. Дата / Час */}
+                            <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-brand">
+                                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
+                                <input
+                                    type="datetime-local"
+                                    value={bookingDate}
+                                    onChange={(e) => setBookingDate(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-xs text-gray-800"
+                                />
+                            </div>
+
+                            {/* 4. Кількість гостей */}
+                            <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-brand">
+                                <Users className="w-4 h-4 text-gray-400 shrink-0" />
+                                <select
+                                    value={guests}
+                                    onChange={(e) => setGuests(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-xs text-gray-800 cursor-pointer"
+                                >
+                                    <option value="">Будь-яка кількість</option>
+                                    <option value="1">1 гість</option>
+                                    <option value="2">2 гості</option>
+                                    <option value="3">3-4 гості</option>
+                                    <option value="5">5+ гостей</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-2 px-3 py-2 border-r md:border-r border-gray-200">
-                            <Calendar className="w-5 h-5 text-brand shrink-0" />
-                            <input
-                                type="date"
-                                className="w-full bg-transparent outline-none text-sm text-gray-600"
-                            />
-                        </div>
+                        {/* Перемикачі зручностей (Boolean бейджі) */}
+                        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
+                            <span className="text-[11px] font-semibold text-gray-400 mr-1">Опції:</span>
 
-                        <div className="flex items-center gap-2 px-3 py-2">
-                            <Users className="w-5 h-5 text-brand shrink-0" />
-                            <select className="w-full bg-transparent outline-none text-sm text-gray-600">
-                                <option value="2">2 персони</option>
-                                <option value="3">3 персони</option>
-                                <option value="4">4+ персони</option>
-                            </select>
-                        </div>
+                            <button
+                                onClick={() => setIsPetFriendly(!isPetFriendly)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isPetFriendly ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <Dog className="w-3.5 h-3.5" />
+                                <span>Pet-Friendly</span>
+                            </button>
 
-                        <button
-                            onClick={fetchRestaurants}
-                            className="bg-brand hover:bg-brand-hover text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-md"
-                        >
-                            <Search className="w-5 h-5" />
-                            <span>Шукати</span>
-                        </button>
+                            <button
+                                onClick={() => setHasSummerTerrace(!hasSummerTerrace)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasSummerTerrace ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <Sun className="w-3.5 h-3.5" />
+                                <span>Літня тераса</span>
+                            </button>
+
+                            <button
+                                onClick={() => setHasKidsZone(!hasKidsZone)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasKidsZone ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <Baby className="w-3.5 h-3.5" />
+                                <span>Дитяча зона</span>
+                            </button>
+
+                            <button
+                                onClick={() => setHasWifi(!hasWifi)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasWifi ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <Wifi className="w-3.5 h-3.5" />
+                                <span>Wi-Fi</span>
+                            </button>
+
+                            <button
+                                onClick={() => setHasParking(!hasParking)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasParking ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <ParkingCircle className="w-3.5 h-3.5" />
+                                <span>Парковка</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Фильтры и Категории */}
-            <div className="max-w-6xl mx-auto px-4 mt-8">
-                <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-none">
+            {/* Фільтри за типами кухні */}
+            <div className="max-w-6xl mx-auto px-4 mb-6">
+                <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
                     <button
                         onClick={() => setSelectedCuisine('')}
-                        className={`px-5 py-2.5 rounded-full text-sm font-medium transition shrink-0 ${selectedCuisine === ''
+                        className={`px-5 py-2 rounded-full text-xs font-semibold transition shrink-0 ${selectedCuisine === ''
                                 ? 'bg-brand text-white shadow-sm'
                                 : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                             }`}
                     >
-                        Усі заклади
+                        Усі кухни
                     </button>
                     {['Українська', 'Італійська', 'Японська', 'Європейська', 'Азіатська'].map((cuisine) => (
                         <button
                             key={cuisine}
                             onClick={() => setSelectedCuisine(cuisine)}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition shrink-0 ${selectedCuisine === cuisine
+                            className={`px-5 py-2 rounded-full text-xs font-semibold transition shrink-0 ${selectedCuisine === cuisine
                                     ? 'bg-brand text-white shadow-sm'
                                     : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                                 }`}
@@ -114,11 +249,22 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Список ресторанов */}
-            <div className="max-w-6xl mx-auto px-4 mt-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-6">
-                    Результати пошуку ({filteredRestaurants.length})
-                </h2>
+            {/* Список закладів */}
+            <div className="max-w-6xl mx-auto px-4">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-800">
+                        Результати пошуку ({filteredRestaurants.length})
+                    </h2>
+                    {hasActiveFilters && (
+                        <button
+                            onClick={resetAllFilters}
+                            className="flex items-center gap-1 text-xs text-brand hover:underline font-semibold"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Скинути всі фільтри</span>
+                        </button>
+                    )}
+                </div>
 
                 {loading ? (
                     <div className="text-center py-16">
@@ -127,7 +273,13 @@ export default function HomePage() {
                     </div>
                 ) : filteredRestaurants.length === 0 ? (
                     <div className="text-center py-16 bg-white rounded-3xl border border-gray-100">
-                        <p className="text-gray-500 font-medium">Закладів не знайдено</p>
+                        <p className="text-gray-500 font-medium text-sm">Закладів за вашими критеріями не знайдено</p>
+                        <button
+                            onClick={resetAllFilters}
+                            className="mt-3 px-4 py-2 bg-brand text-white rounded-xl text-xs font-semibold hover:bg-brand-hover"
+                        >
+                            Скинути фільтри
+                        </button>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -136,7 +288,7 @@ export default function HomePage() {
                                 key={restaurant.id}
                                 className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col group"
                             >
-                                {/* Картинка ресторана */}
+                                {/* Картинка закладу */}
                                 <div className="relative h-48 overflow-hidden bg-gray-200">
                                     <img
                                         src={restaurant.imageUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"}
@@ -147,11 +299,11 @@ export default function HomePage() {
                                         <Heart className="w-4 h-4" />
                                     </button>
                                     <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
-                                        {restaurant.cuisineType || "Ресторан"}
+                                        {restaurant.restaurantType || restaurant.cuisineType || "Ресторан"}
                                     </span>
                                 </div>
 
-                                {/* Инфо о ресторане */}
+                                {/* Інформація */}
                                 <div className="p-5 flex flex-col flex-grow justify-between">
                                     <div>
                                         <div className="flex justify-between items-start mb-2">
@@ -166,8 +318,17 @@ export default function HomePage() {
 
                                         <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
                                             <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                                            <span>{restaurant.address || restaurant.city}</span>
+                                            <span>м. {restaurant.city}, {restaurant.address}</span>
                                         </p>
+
+                                        {/* Значки зручностей на картці */}
+                                        <div className="flex items-center gap-2 mb-3 text-gray-400">
+                                            {restaurant.isPetFriendly && <Dog className="w-3.5 h-3.5 text-brand" title="Pet Friendly" />}
+                                            {restaurant.hasSummerTerrace && <Sun className="w-3.5 h-3.5 text-brand" title="Літня тераса" />}
+                                            {restaurant.hasKidsZone && <Baby className="w-3.5 h-3.5 text-brand" title="Дитяча зона" />}
+                                            {restaurant.hasWifi && <Wifi className="w-3.5 h-3.5 text-brand" title="Wi-Fi" />}
+                                            {restaurant.hasParking && <ParkingCircle className="w-3.5 h-3.5 text-brand" title="Парковка" />}
+                                        </div>
 
                                         <p className="text-xs text-gray-600 line-clamp-2 mb-4">
                                             {restaurant.description || "Чудовий заклад із затишною атмосферою та смачною кухнею."}
