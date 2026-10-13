@@ -2,11 +2,21 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, MapPin, User, LogOut } from 'lucide-react';
 
+// Встроенный компонент логотипа
+function Logo({ className = "w-8 h-8" }) {
+    return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+            <circle cx="50" cy="50" r="48" fill="#FF5A1F" />
+            <path d="M50 20C38.9543 20 30 28.9543 30 40C30 55 50 78 50 78C50 78 70 55 70 40C70 28.9543 61.0457 20 50 20Z" fill="white" />
+            <circle cx="50" cy="38" r="9" fill="#FF5A1F" />
+        </svg>
+    );
+}
+
 export default function Navbar() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
 
-    // Безопасное чтение пользователя из localStorage
     let user = null;
     try {
         const storedUser = localStorage.getItem('user');
@@ -27,11 +37,11 @@ export default function Navbar() {
         <header className="border-b bg-white shadow-sm">
             <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 {/* Логотип */}
-                <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-brand">
-                    <div className="bg-brand text-white p-1.5 rounded-lg">
-                        <MapPin className="w-6 h-6 fill-current text-white" />
-                    </div>
-                    <span>TASTE MAP</span>
+                <Link to="/" className="flex items-center gap-2">
+                    <Logo className="w-8 h-8" />
+                    <span className="text-xl font-black text-gray-900">
+                        Taste<span className="text-brand">Map</span>
+                    </span>
                 </Link>
 
                 {/* Навигация */}
