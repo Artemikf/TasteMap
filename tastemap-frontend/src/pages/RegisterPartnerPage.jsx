@@ -7,22 +7,20 @@ export default function RegisterPartnerPage() {
     const handleStartRegistration = () => {
         const token = localStorage.getItem('token');
         if (token) {
-            // Если пользователь уже авторизован, отправляем в панель управления
-            navigate('/dashboard');
+            // Если авторизован — сразу перенаправляем на создание еще одного ресторана
+            navigate('/dashboard', { state: { createNew: true } });
         } else {
-            // Если не авторизован — на регистрацию с выставленной галочкой
+            // Если не авторизован — отправляем на регистрацию аккаунта владельца
             navigate('/register', { state: { isOwner: true } });
         }
     };
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-            {/* Хлебные крошки */}
             <div className="text-xs text-gray-400 mb-6">
                 <Link to="/" className="hover:underline">Головна</Link> &gt; <span className="text-gray-600">Реєстрація закладу</span>
             </div>
 
-            {/* Hero Баннер */}
             <div className="bg-gray-50 rounded-3xl p-8 md:p-12 mb-12 border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-8 shadow-sm">
                 <div className="max-w-xl">
                     <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
@@ -47,14 +45,13 @@ export default function RegisterPartnerPage() {
                 </div>
             </div>
 
-            {/* Заголовок отзывов партнеров */}
+            {/* Отзывы партнеров */}
             <div className="text-center mb-8">
                 <span className="inline-block px-4 py-1.5 border border-brand text-brand rounded-full text-xs font-semibold uppercase tracking-wider">
                     Що кажуть інші власники закладів
                 </span>
             </div>
 
-            {/* Карточки отзывов рестораторов */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col justify-between">
                     <p className="text-xs text-gray-600 leading-relaxed mb-6">
@@ -75,7 +72,7 @@ export default function RegisterPartnerPage() {
 
                 <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col justify-between">
                     <p className="text-xs text-gray-600 leading-relaxed mb-6">
-                        "Найбільше відвідувачів ми отримуємо завдяки платформі Tastemap.com. Це допомогло досягти того, що в нас є сьогодні."
+                        "Найбільше відвідувачів ми отримуємо завдяки платформі Tastemap.com."
                     </p>
                     <div className="flex items-center gap-3">
                         <img
@@ -102,7 +99,7 @@ export default function RegisterPartnerPage() {
                         />
                         <div>
                             <h4 className="text-xs font-bold text-gray-900">Дамір Дорогов</h4>
-                            <p className="text-[11px] text-gray-400">Власник ресторану MATISSR</p>
+                            <p className="text-[11px] text-gray-400">Власник ресторану MATISSE</p>
                         </div>
                     </div>
                 </div>

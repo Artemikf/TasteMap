@@ -24,7 +24,7 @@ public class RestaurantService : IRestaurantService
             Address = dto.Address,
             City = dto.City,
             RestaurantType = dto.RestaurantType,
-            //ImageUrl = dto.ImageUrl, // <-- Не забудь добавить сохранение фото!
+            ImageUrl = dto.ImageUrl, // <-- сохранение фото
             TotalTables = dto.TotalTables,
             MaxGuestsCapacity = dto.MaxGuestsCapacity,
             HasKidsZone = dto.HasKidsZone,
@@ -114,14 +114,13 @@ public class RestaurantService : IRestaurantService
         };
     }
 
-    public async Task<RestaurantDto?> GetByOwnerIdAsync(int ownerId)
+    public async Task<IEnumerable<RestaurantDto>> GetByOwnerIdAsync(int ownerId)
     {
-        var restaurant = await _context.Restaurants
-            .FirstOrDefaultAsync(r => r.OwnerId == ownerId);
+        var restaurants = await _context.Restaurants
+            .Where(r => r.OwnerId == ownerId)
+            .ToListAsync();
 
-        if (restaurant == null) return null;
-
-        return new RestaurantDto
+        return restaurants.Select(restaurant => new RestaurantDto
         {
             Id = restaurant.Id,
             Name = restaurant.Name,
@@ -137,6 +136,6 @@ public class RestaurantService : IRestaurantService
             HasWifi = restaurant.HasWifi,
             HasParking = restaurant.HasParking,
             HasSummerTerrace = restaurant.HasSummerTerrace
-        };
+        });
     }
 }

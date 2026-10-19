@@ -17,7 +17,9 @@ public class RestaurantController : ControllerBase
         _restaurantService = restaurantService;
     }
 
+    // Создание заведения (поддерживает POST /api/Restaurant и POST /api/Restaurant/create)
     [Authorize(Roles = "RestaurantOwner")]
+    [HttpPost]
     [HttpPost("create")]
     public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantDto dto)
     {
@@ -26,12 +28,12 @@ public class RestaurantController : ControllerBase
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdString, out int ownerId))
             {
-                return Unauthorized(new { message = "Не удалось определить пользователя." });
+                return Unauthorized(new { message = "Не вдалося визначити користувача." });
             }
 
             var restaurantId = await _restaurantService.CreateRestaurantAsync(ownerId, dto);
 
-            return Ok(new { message = "Ресторан успешно добавлен!", restaurantId = restaurantId });
+            return Ok(new { message = "Ресторан успішно додано!", restaurantId = restaurantId });
         }
         catch (Exception ex)
         {
@@ -47,20 +49,11 @@ public class RestaurantController : ControllerBase
         return Ok(restaurants);
     }
 
-    // Публичный доступ — детальная страница одного ресторана
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var restaurant = await _restaurantService.GetByIdAsync(id);
-        if (restaurant == null)
-            return NotFound(new { message = "Ресторан не найден." });
-
-        return Ok(restaurant);
-    }
-
+    // Получение списка ВСЕХ ресторанов текущего владельца
     [Authorize(Roles = "RestaurantOwner")]
-    [HttpGet("my-restaurant")]
-    public async Task<IActionResult> GetMyRestaurant()
+    [HttpGet("my-restaurants")]
+    [HttpGet("my-restaurant")] // Сохраняем совместимость со старым маршрутом
+    public async Task<IActionResult> GetMyRestaurants()
     {
         try
         {
@@ -70,18 +63,23 @@ public class RestaurantController : ControllerBase
                 return Unauthorized(new { message = "Не вдалося визначити користувача." });
             }
 
-            var restaurant = await _restaurantService.GetByOwnerIdAsync(ownerId);
-            if (restaurant == null)
-            {
-                // Возвращаем 200 OK со значением null (или 404), чтобы фронтенд сразу предлагал создать ресторан
-                return Ok(null);
-            }
-
-            return Ok(restaurant);
+            var restaurants = await _restaurantService.GetByOwnerIdAsync(ownerId);
+            return Ok(restaurants);
         }
         catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    // Публичный доступ — детальная страница одного ресторана
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var restaurant = await _restaurantService.GetByIdAsync(id);
+        if (restaurant == null)
+            return NotFound(new { message = "Ресторан не знайдено." });
+
+        return Ok(restaurant);
     }
 }
