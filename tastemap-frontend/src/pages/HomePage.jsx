@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Search, MapPin, Users, Calendar, Star, Heart,
-    Dog, Sun, Baby, Wifi, ParkingCircle, X
+    Dog, Sun, Baby, Wifi, ParkingCircle, X, Info
 } from 'lucide-react';
 import api from '../api/axios';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
@@ -10,6 +10,9 @@ import { getFavorites, toggleFavorite } from '../utils/favorites';
 export default function HomePage() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Модальное окно быстрого просмотра
+    const [selectedRestaurant, setSelectedRestaurant] = useState(null);
 
     // Основні фільтри
     const [searchTerm, setSearchTerm] = useState('');
@@ -32,7 +35,6 @@ export default function HomePage() {
         fetchRestaurants();
         setFavList(getFavorites());
 
-        // Слушаем обновления избранного из других компонентов
         const updateFavs = () => setFavList(getFavorites());
         window.addEventListener('favoritesUpdated', updateFavs);
         return () => window.removeEventListener('favoritesUpdated', updateFavs);
@@ -51,13 +53,13 @@ export default function HomePage() {
     };
 
     const handleToggleFav = (e, restaurantId) => {
-        e.preventDefault(); // Запрещаем переход по ссылке карточки
+        e.preventDefault();
         e.stopPropagation();
         toggleFavorite(restaurantId);
         setFavList(getFavorites());
     };
 
-    // Гнучка фільтрація на клієнті за всіма критеріями
+    // Фільтрація закладу
     const filteredRestaurants = restaurants.filter(r => {
         const matchesSearch = !searchTerm ||
             r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -99,15 +101,14 @@ export default function HomePage() {
         hasWifi || isPetFriendly || hasKidsZone || hasParking || hasSummerTerrace;
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-16">
-            {/* Головний банер (Hero Section) */}
+        <div className="min-h-screen bg-gray-50 pb-16 relative">
+            {/* Головний банер */}
             <div className="relative overflow-hidden mb-8 min-h-[480px] flex items-center justify-center text-center shadow-lg">
                 <img
                     src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80"
-                    alt="TasteMap Restaurant Background"
+                    alt="TasteMap Background"
                     className="absolute inset-0 w-full h-full object-cover"
                 />
-
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
 
                 <div className="relative z-10 max-w-5xl mx-auto px-4 py-10 text-white w-full">
@@ -118,7 +119,7 @@ export default function HomePage() {
                         Обирайте за датою, кількістю гостей, зручностями та типом кухні
                     </p>
 
-                    {/* Мульти-панель фільтрів у банері */}
+                    {/* Поисковая мульти-панель */}
                     <div className="bg-white/95 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-white/20 text-gray-800 text-left">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                             <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-brand">
@@ -176,47 +177,37 @@ export default function HomePage() {
 
                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
                             <span className="text-[11px] font-semibold text-gray-400 mr-1">Опції:</span>
-
                             <button
                                 onClick={() => setIsPetFriendly(!isPetFriendly)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isPetFriendly ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isPetFriendly ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 <Dog className="w-3.5 h-3.5" />
                                 <span>Pet-Friendly</span>
                             </button>
-
                             <button
                                 onClick={() => setHasSummerTerrace(!hasSummerTerrace)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasSummerTerrace ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasSummerTerrace ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 <Sun className="w-3.5 h-3.5" />
                                 <span>Літня тераса</span>
                             </button>
-
                             <button
                                 onClick={() => setHasKidsZone(!hasKidsZone)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasKidsZone ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasKidsZone ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 <Baby className="w-3.5 h-3.5" />
                                 <span>Дитяча зона</span>
                             </button>
-
                             <button
                                 onClick={() => setHasWifi(!hasWifi)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasWifi ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasWifi ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 <Wifi className="w-3.5 h-3.5" />
                                 <span>Wi-Fi</span>
                             </button>
-
                             <button
                                 onClick={() => setHasParking(!hasParking)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasParking ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${hasParking ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 <ParkingCircle className="w-3.5 h-3.5" />
                                 <span>Парковка</span>
@@ -226,15 +217,12 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Фільтри за типами кухні */}
+            {/* Фильтры Кухни */}
             <div className="max-w-6xl mx-auto px-4 mb-6">
                 <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
                     <button
                         onClick={() => setSelectedCuisine('')}
-                        className={`px-5 py-2 rounded-full text-xs font-semibold transition shrink-0 ${selectedCuisine === ''
-                                ? 'bg-brand text-white shadow-sm'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                            }`}
+                        className={`px-5 py-2 rounded-full text-xs font-semibold transition shrink-0 ${selectedCuisine === '' ? 'bg-brand text-white shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
                     >
                         Усі кухни
                     </button>
@@ -242,10 +230,7 @@ export default function HomePage() {
                         <button
                             key={cuisine}
                             onClick={() => setSelectedCuisine(cuisine)}
-                            className={`px-5 py-2 rounded-full text-xs font-semibold transition shrink-0 ${selectedCuisine === cuisine
-                                    ? 'bg-brand text-white shadow-sm'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                }`}
+                            className={`px-5 py-2 rounded-full text-xs font-semibold transition shrink-0 ${selectedCuisine === cuisine ? 'bg-brand text-white shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
                         >
                             {cuisine}
                         </button>
@@ -253,7 +238,7 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Список закладів */}
+            {/* Список заведений */}
             <div className="max-w-6xl mx-auto px-4">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-800">
@@ -300,10 +285,10 @@ export default function HomePage() {
                                         <img
                                             src={restaurant.imageUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"}
                                             alt={restaurant.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300 cursor-pointer"
+                                            onClick={() => setSelectedRestaurant(restaurant)}
                                         />
 
-                                        {/* Інтерактивна кнопка обраного */}
                                         <button
                                             onClick={(e) => handleToggleFav(e, restaurant.id)}
                                             className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white text-gray-600 transition shadow-sm z-10"
@@ -317,21 +302,27 @@ export default function HomePage() {
                                         </span>
                                     </div>
 
-                                    {/* Інформація */}
+                                    {/* Информационная часть карточки */}
                                     <div className="p-5 flex flex-col flex-grow justify-between">
                                         <div>
                                             <div className="flex justify-between items-start mb-2">
-                                                <h3 className="text-lg font-bold text-gray-900 group-hover:text-brand transition">
-                                                    {restaurant.name}
-                                                </h3>
-                                                <div className="flex items-center gap-1 text-sm font-semibold text-amber-500">
+                                                {/* Клик на название открывает предпросмотр */}
+                                                <button
+                                                    onClick={() => setSelectedRestaurant(restaurant)}
+                                                    className="text-lg font-bold text-gray-900 hover:text-brand transition text-left cursor-pointer flex items-center gap-1.5"
+                                                >
+                                                    <span>{restaurant.name}</span>
+                                                    <Info className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition shrink-0" />
+                                                </button>
+
+                                                <div className="flex items-center gap-1 text-sm font-semibold text-amber-500 shrink-0 ml-2">
                                                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                                                     <span>{restaurant.rating || "4.8"}</span>
                                                 </div>
                                             </div>
 
                                             <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
-                                                <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                                <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                                 <span>м. {restaurant.city}, {restaurant.address}</span>
                                             </p>
 
@@ -361,6 +352,104 @@ export default function HomePage() {
                     </div>
                 )}
             </div>
+
+            {/* ---------------- МОДАЛЬНОЕ ОКНО ПРЕДПРОСМОТРА ---------------- */}
+            {selectedRestaurant && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity animate-fadeIn"
+                    onClick={() => setSelectedRestaurant(null)}
+                >
+                    <div
+                        className="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl relative border border-gray-100 text-gray-800"
+                        onClick={(e) => e.stopPropagation()} // Предотвращаем закрытие при клике внутри модалки
+                    >
+                        {/* Кнопка закрытия */}
+                        <button
+                            onClick={() => setSelectedRestaurant(null)}
+                            className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {/* Главное фото */}
+                        <div className="relative h-64 bg-gray-200">
+                            <img
+                                src={selectedRestaurant.imageUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"}
+                                alt={selectedRestaurant.name}
+                                className="w-full h-full object-cover"
+                            />
+                            <span className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full font-medium">
+                                {selectedRestaurant.restaurantType || selectedRestaurant.cuisineType || "Ресторан"}
+                            </span>
+                        </div>
+
+                        {/* Содержимое предпросмотра */}
+                        <div className="p-6">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
+                                        {selectedRestaurant.name}
+                                    </h2>
+                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                        <MapPin className="w-4 h-4 text-brand shrink-0" />
+                                        <span>м. {selectedRestaurant.city}, {selectedRestaurant.address}</span>
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-1 bg-amber-50 px-3 py-1.5 rounded-full text-amber-600 font-bold text-sm border border-amber-200">
+                                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                                    <span>{selectedRestaurant.rating || "4.8"}</span>
+                                </div>
+                            </div>
+
+                            {/* Полное описание */}
+                            <p className="text-xs md:text-sm text-gray-600 leading-relaxed mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                {selectedRestaurant.description || "Чудовий заклад із затишною атмосферою, вишуканою кухнею та висококласним обслуговуванням."}
+                            </p>
+
+                            {/* Теги удобств */}
+                            <div className="mb-6">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Зручності та сервіси:</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedRestaurant.isPetFriendly && (
+                                        <span className="flex items-center gap-1 px-3 py-1 bg-orange-50 text-brand text-xs font-semibold rounded-full border border-orange-100">
+                                            <Dog className="w-3.5 h-3.5" /> Pet-Friendly
+                                        </span>
+                                    )}
+                                    {selectedRestaurant.hasSummerTerrace && (
+                                        <span className="flex items-center gap-1 px-3 py-1 bg-orange-50 text-brand text-xs font-semibold rounded-full border border-orange-100">
+                                            <Sun className="w-3.5 h-3.5" /> Літня тераса
+                                        </span>
+                                    )}
+                                    {selectedRestaurant.hasKidsZone && (
+                                        <span className="flex items-center gap-1 px-3 py-1 bg-orange-50 text-brand text-xs font-semibold rounded-full border border-orange-100">
+                                            <Baby className="w-3.5 h-3.5" /> Дитяча зона
+                                        </span>
+                                    )}
+                                    {selectedRestaurant.hasWifi && (
+                                        <span className="flex items-center gap-1 px-3 py-1 bg-orange-50 text-brand text-xs font-semibold rounded-full border border-orange-100">
+                                            <Wifi className="w-3.5 h-3.5" /> Wi-Fi
+                                        </span>
+                                    )}
+                                    {selectedRestaurant.hasParking && (
+                                        <span className="flex items-center gap-1 px-3 py-1 bg-orange-50 text-brand text-xs font-semibold rounded-full border border-orange-100">
+                                            <ParkingCircle className="w-3.5 h-3.5" /> Парковка
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Кнопка действия */}
+                            <Link
+                                to={`/restaurant/${selectedRestaurant.id}`}
+                                className="w-full py-3.5 bg-brand hover:bg-brand-hover text-white font-bold rounded-2xl text-sm text-center transition shadow-md block"
+                            >
+                                Перейти до закладу та забронювати
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
