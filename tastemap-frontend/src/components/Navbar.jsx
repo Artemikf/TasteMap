@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, MapPin, User, LogOut } from 'lucide-react';
+import { Heart, User, LogOut } from 'lucide-react';
+import { getFavorites } from '../utils/favorites';
 
 // Встроенный компонент логотипа
 function Logo({ className = "w-8 h-8" }) {
@@ -16,6 +17,18 @@ function Logo({ className = "w-8 h-8" }) {
 export default function Navbar() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const [favCount, setFavCount] = useState(0);
+
+    // Подгружаем количество сохраненных ресторанов и слушаем изменения
+    useEffect(() => {
+        const updateCount = () => {
+            setFavCount(getFavorites().length);
+        };
+        updateCount();
+
+        window.addEventListener('favoritesUpdated', updateCount);
+        return () => window.removeEventListener('favoritesUpdated', updateCount);
+    }, []);
 
     let user = null;
     try {
@@ -34,7 +47,7 @@ export default function Navbar() {
     };
 
     return (
-        <header className="border-b bg-white shadow-sm">
+        <header className="border-b bg-white shadow-sm sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 {/* Логотип */}
                 <Link to="/" className="flex items-center gap-2">
@@ -75,9 +88,19 @@ export default function Navbar() {
                         </>
                     )}
 
-                    <button className="p-2 border rounded-xl hover:bg-gray-50 transition">
-                        <Heart className="w-5 h-5 text-gray-600" />
-                    </button>
+                    {/* Кнопка «Избранное» с бейджем количества */}
+                    <Link
+                        to="/favorites"
+                        className="relative p-2 border rounded-xl hover:bg-orange-50 transition text-gray-600 hover:text-brand flex items-center justify-center"
+                        title="Улюблені заклади"
+                    >
+                        <Heart className={`w-5 h-5 transition ${favCount > 0 ? 'fill-brand text-brand' : ''}`} />
+                        {favCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 bg-brand text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                                {favCount}
+                            </span>
+                        )}
+                    </Link>
                 </div>
             </div>
         </header>

@@ -11,6 +11,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import ProfilePage from './pages/ProfilePage';
 import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
+import FavoritesPage from './pages/FavoritesPage';
 
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
@@ -35,6 +36,7 @@ export default function App() {
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/dashboard" element={<OwnerDashboardPage />} />
                         <Route path="*" element={<NotFoundPage />} />
+                        <Route path="/favorites" element={<FavoritesPage />} />
 
                         <Route path="/privacy" element={<PrivacyPage />} />
                         <Route path="/terms" element={<TermsPage />} />
